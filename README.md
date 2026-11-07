@@ -31,12 +31,39 @@ Pick a different opmode or change the pass/fail check:
 
 ```
 src/main/java/
-  com/qualcomm/robotcore/...        fake FTC SDK (DcMotor, HardwareMap, LinearOpMode, @TeleOp)
-  org/firstinspires/ftc/robotcore/  fake Telemetry
+  com/qualcomm/robotcore/...        mirror of the real FTC SDK API (interfaces + enums):
+                                    DcMotor(Ex), DcMotorSimple, Servo, CRServo, Gamepad,
+                                    HardwareMap, OpMode, LinearOpMode, @TeleOp/@Autonomous
+  org/firstinspires/ftc/robotcore/  Telemetry (+Item/Line/Log), AngleUnit, CurrentUnit
+  com/ftcsim/sim/                   desktop implementations: SimDcMotor (implements DcMotorEx),
+                                    SimServo, SimCRServo, SimTelemetry
   com/ftcsim/engine/                the sim: RobotConfig, SimRobot (diff-drive physics),
                                     SwingField (field view), SimMain (launcher)
   org/firstinspires/ftc/teamcode/   your opmodes (Spin_Turn_90_Degrees, _Buggy)
+scripts/
+  check_sdk_signatures.py           proves our mirror matches the real SDK 1:1
 ```
+
+## 1:1 with the real FTC SDK
+
+The `com.qualcomm.*` / `org.firstinspires.*` classes are a **mirror of the genuine FTC SDK
+(v12.0.0)** — same packages, same interface hierarchy (`DcMotor` is an interface extending
+`DcMotorSimple extends HardwareDevice`, `Direction` lives in `DcMotorSimple`, etc.), same
+method signatures. So an opmode you write here is byte-identical to the one you deploy.
+
+That claim is enforced, not hoped: `scripts/check_sdk_signatures.py` downloads the real SDK
+jars from Maven Central and uses `javap` to compare every member we declare against the real
+one. CI fails on any **drift** (a signature we declare that the real SDK lacks). It also
+reports **coverage gaps** (real members we have not mirrored yet — e.g. IMU, sensors, Gamepad
+edge helpers) so we know what is still missing.
+
+```bash
+python3 scripts/check_sdk_signatures.py     # or `py` on Windows
+```
+
+Where the real SDK is tangled with Android (`OpMode` extends an internal base, `HardwareMap`
+holds an `android.content.Context`), the mirror reproduces the **callable** API opmodes use
+and drops the Android scaffolding, which is why it runs natively on a desktop JVM.
 
 ## How the physics works
 
