@@ -1,5 +1,7 @@
 # FTC VibeSim
 
+[![CI](https://github.com/opsec-bot/ftc-vibesim/actions/workflows/ci.yml/badge.svg)](https://github.com/opsec-bot/ftc-vibesim/actions/workflows/ci.yml)
+
 A tiny local FTC simulator for vibecoding bots. Write an opmode against the real FTC SDK
 API, run it on your laptop, watch the robot drive on a field, no Control Hub required.
 
