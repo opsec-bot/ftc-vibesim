@@ -1,0 +1,45 @@
+plugins {
+    id 'application'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Same 2D physics engine ARESLib's desktop sim is built on.
+    // v0 drives the robot with exact differential-drive kinematics (no tuning, fully
+    // verifiable). dyn4j is wired in here for the v1 upgrade: field walls, game
+    // elements and real collisions. Not imported by v0 code yet.
+    implementation 'org.dyn4j:dyn4j:5.0.2'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+application {
+    mainClass = 'com.ftcsim.engine.SimMain'
+}
+
+// `./gradlew run`  -> GUI window, real time. Watch the robot drive.
+tasks.named('run', JavaExec) {
+    systemProperty 'sim.headless', project.hasProperty('headless') ? 'true' : 'false'
+    systemProperty 'sim.fast', project.hasProperty('fast') ? 'true' : 'false'
+}
+
+// `./gradlew runSim`  -> headless, fast, prints trajectory + final pose. For quick checks / CI.
+tasks.register('runSim', JavaExec) {
+    group = 'application'
+    description = 'Run the sim headless and fast, print the trajectory and final pose.'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.ftcsim.engine.SimMain'
+    systemProperty 'sim.headless', project.hasProperty('gui') ? 'false' : 'true'
+    systemProperty 'sim.fast', 'true'
+    // -Popmode=<FQCN> to sim a different opmode; -Pexpect=<deg> to set the pass/fail heading.
+    if (project.hasProperty('opmode')) systemProperty 'sim.opmode', project.property('opmode')
+    if (project.hasProperty('snapshot')) systemProperty 'sim.snapshot', project.property('snapshot')
+    systemProperty 'sim.expectHeadingDeg', project.hasProperty('expect') ? project.property('expect') : '-90'
+}
