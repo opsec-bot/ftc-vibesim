@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+
+jobs:
+  sim:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Build
+        run: ./gradlew build --console=plain
+
+      - name: Smoke test — fixed Spin_Turn_90 must end at -90 deg
+        run: ./gradlew runSim --console=plain
+
+      - name: Regression check — buggy opmode must NOT reach -90 deg
+        run: |
+          if ./gradlew runSim -Popmode=org.firstinspires.ftc.teamcode.Spin_Turn_90_Buggy --console=plain ; then
+            echo "ERROR: buggy opmode unexpectedly passed the -90 deg check"
+            exit 1
+          else
+            echo "OK: buggy opmode failed the check as expected"
+          fi
