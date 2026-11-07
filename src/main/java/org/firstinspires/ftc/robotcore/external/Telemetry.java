@@ -1,49 +1,71 @@
 package org.firstinspires.ftc.robotcore.external;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 /**
- * Minimal stand-in for the FTC SDK Telemetry. addData/addLine queue key-value lines,
- * update() renders them (and clears for the next cycle), just like on the Driver Station.
- * The engine reads getRendered() to show the latest telemetry in the sim window / console.
+ * Mirror of the FTC SDK Telemetry interface (callable public API, including the
+ * Item / Line / Log nested types). A desktop implementation lives in
+ * com.ftcsim.sim.SimTelemetry.
  */
-public class Telemetry {
+public interface Telemetry {
 
-    private final LinkedHashMap<String, String> data = new LinkedHashMap<>();
-    private volatile String rendered = "";
-    private int lineCounter = 0;
+    enum DisplayFormat { CLASSIC, MONOSPACE, HTML }
 
-    public Object addData(String caption, Object value) {
-        data.put(caption, String.valueOf(value));
-        return null;
+    interface Item {
+        String getCaption();
+        Item setCaption(String caption);
+        Item setValue(String format, Object... args);
+        Item setValue(Object value);
+        <T> Item setValue(Func<T> valueProducer);
+        <T> Item setValue(String format, Func<T> valueProducer);
+        Item setRetained(Boolean retained);
+        boolean isRetained();
+        Item addData(String caption, String format, Object... args);
+        Item addData(String caption, Object value);
+        <T> Item addData(String caption, Func<T> valueProducer);
+        <T> Item addData(String caption, String format, Func<T> valueProducer);
     }
 
-    public Object addData(String caption, String format, Object... args) {
-        data.put(caption, String.format(format, args));
-        return null;
+    interface Line {
+        Item addData(String caption, String format, Object... args);
+        Item addData(String caption, Object value);
+        <T> Item addData(String caption, Func<T> valueProducer);
+        <T> Item addData(String caption, String format, Func<T> valueProducer);
     }
 
-    public Object addLine(String line) {
-        data.put("\u0000line" + (lineCounter++), line);
-        return null;
+    interface Log {
+        enum DisplayOrder { OLDEST_FIRST, NEWEST_FIRST }
+        int getCapacity();
+        void setCapacity(int capacity);
+        DisplayOrder getDisplayOrder();
+        void setDisplayOrder(DisplayOrder displayOrder);
+        void add(String entry);
+        void add(String format, Object... args);
+        void clear();
     }
 
-    public boolean update() {
-        StringBuilder sb = new StringBuilder();
-        for (Map.Entry<String, String> e : data.entrySet()) {
-            if (e.getKey().startsWith("\u0000line")) {
-                sb.append(e.getValue()).append('\n');
-            } else {
-                sb.append(e.getKey()).append(" : ").append(e.getValue()).append('\n');
-            }
-        }
-        rendered = sb.toString();
-        data.clear();
-        lineCounter = 0;
-        return true;
-    }
-
-    /** SIM ONLY: latest rendered telemetry block. */
-    public String getRendered() { return rendered; }
+    Item addData(String caption, String format, Object... args);
+    Item addData(String caption, Object value);
+    <T> Item addData(String caption, Func<T> valueProducer);
+    <T> Item addData(String caption, String format, Func<T> valueProducer);
+    boolean removeItem(Item item);
+    void clear();
+    void clearAll();
+    Object addAction(Runnable action);
+    boolean removeAction(Object token);
+    void speak(String text);
+    void speak(String text, String languageCode, String countryCode);
+    boolean update();
+    Line addLine();
+    Line addLine(String lineCaption);
+    boolean removeLine(Line line);
+    boolean isAutoClear();
+    void setAutoClear(boolean autoClear);
+    int getMsTransmissionInterval();
+    void setMsTransmissionInterval(int msTransmissionInterval);
+    String getItemSeparator();
+    void setItemSeparator(String itemSeparator);
+    String getCaptionValueSeparator();
+    void setCaptionValueSeparator(String captionValueSeparator);
+    void setDisplayFormat(DisplayFormat displayFormat);
+    default void setNumDecimalPlaces(int minDecimalPlaces, int maxDecimalPlaces) {}
+    Log log();
 }

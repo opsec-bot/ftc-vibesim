@@ -1,17 +1,11 @@
 package com.qualcomm.robotcore.eventloop.opmode;
 
-import com.qualcomm.robotcore.hardware.HardwareMap;
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-
 /**
- * Simulated FTC LinearOpMode. Same lifecycle as the real one: the engine injects
- * hardwareMap + telemetry, starts your opmode on its own thread, releases waitForStart()
- * when the match "starts", and keeps opModeIsActive() true until the opmode ends.
+ * Desktop mirror of the FTC SDK LinearOpMode. Same lifecycle: the engine injects
+ * hardwareMap/telemetry/gamepads (on OpMode), starts runOpMode() on its own thread,
+ * releases waitForStart() when the match starts, and keeps opModeIsActive() true until stop.
  */
-public abstract class LinearOpMode {
-
-    public HardwareMap hardwareMap;
-    public Telemetry telemetry;
+public abstract class LinearOpMode extends OpMode {
 
     private volatile boolean started = false;
     private volatile boolean stopRequested = false;
@@ -26,8 +20,8 @@ public abstract class LinearOpMode {
     }
 
     public boolean opModeIsActive() { return started && !stopRequested; }
-    public boolean opModeInInit()  { return !started && !stopRequested; }
-    public boolean isStarted()     { return started; }
+    public boolean opModeInInit()   { return !started && !stopRequested; }
+    public boolean isStarted()      { return started; }
     public boolean isStopRequested() { return stopRequested; }
 
     public void idle() {
@@ -39,6 +33,10 @@ public abstract class LinearOpMode {
         try { Thread.sleep(milliseconds); }
         catch (InterruptedException e) { Thread.currentThread().interrupt(); }
     }
+
+    // OpMode's abstract hooks are driven by runOpMode() in a LinearOpMode; make them final no-ops.
+    @Override public final void init() {}
+    @Override public final void loop() {}
 
     // ===================== SIM ONLY =====================
     public void simStart()       { started = true; }

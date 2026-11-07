@@ -10,4 +10,5 @@ import java.lang.annotation.Target;
 public @interface Autonomous {
     String name() default "";
     String group() default "";
+    String preselectTeleOp() default "";
 }
