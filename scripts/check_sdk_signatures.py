@@ -53,6 +53,8 @@ CLASSES = [
     "org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit",
 ]
 
+SHOW_GAPS = "--gaps" in sys.argv
+
 MODIFIERS = {"public", "abstract", "final", "static", "default", "volatile",
              "transient", "synchronized", "native", "strictfp"}
 
@@ -138,7 +140,8 @@ def main():
         drift = sorted(s for s in our_sigs
                        if s not in real_sigs and member_name(s) in real_names)
         # GAP = real public members we have not mirrored yet (missing overloads/methods).
-        gap = len(real_sigs - our_sigs)
+        gap_sigs = sorted(real_sigs - our_sigs)
+        gap = len(gap_sigs)
         total_gap += gap
         if drift:
             total_drift += len(drift)
@@ -147,6 +150,9 @@ def main():
                 print(f"         ours: {d}  <-- not in real SDK")
         else:
             print(f"[OK]    {fqcn}  ({gap} gaps)")
+        if SHOW_GAPS and gap_sigs:
+            for g in gap_sigs:
+                print(f"         gap: {g}")
 
     print(f"\nChecked {checked} classes.  Drift (mismatched signatures): {total_drift}.  "
           f"Coverage gaps (not yet mirrored): {total_gap}.")
