@@ -1,6 +1,6 @@
 package com.ftcsim.engine;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
+import com.ftcsim.sim.SimTelemetry;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,11 +17,11 @@ public class SwingField extends JPanel {
 
     private static final int FIELD_CM = 360;
     private final SimRobot robot;
-    private final Telemetry telemetry;
+    private final SimTelemetry telemetry;
     private final Deque<double[]> trail = new ArrayDeque<>();
     private volatile double simTime = 0.0;
 
-    public SwingField(SimRobot robot, Telemetry telemetry) {
+    public SwingField(SimRobot robot, SimTelemetry telemetry) {
         this.robot = robot;
         this.telemetry = telemetry;
         setPreferredSize(new Dimension(680, 720));
@@ -35,7 +35,7 @@ public class SwingField extends JPanel {
         while (trail.size() > 600) trail.removeFirst();
     }
 
-    public static JFrame show(SimRobot robot, Telemetry telemetry) {
+    public static JFrame show(SimRobot robot, SimTelemetry telemetry) {
         final JFrame[] holder = new JFrame[1];
         try {
             SwingUtilities.invokeAndWait(() -> {

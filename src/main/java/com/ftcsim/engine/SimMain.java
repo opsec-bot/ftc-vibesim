@@ -1,9 +1,10 @@
 package com.ftcsim.engine;
 
+import com.ftcsim.sim.SimDcMotor;
+import com.ftcsim.sim.SimTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import javax.swing.JFrame;
 
@@ -29,15 +30,15 @@ public class SimMain {
 
         // --- build the robot / hardware ---
         RobotConfig cfg = new RobotConfig();
-        DcMotor motorL = new DcMotor("SWmotorL");
-        DcMotor motorR = new DcMotor("SWmotorR");
+        SimDcMotor motorL = new SimDcMotor("SWmotorL");
+        SimDcMotor motorR = new SimDcMotor("SWmotorR");
         SimRobot robot = new SimRobot(cfg, motorL, motorR);
 
         HardwareMap hw = new HardwareMap();
         hw.put("SWmotorL", motorL);
         hw.put("SWmotorR", motorR);
 
-        Telemetry telemetry = new Telemetry();
+        SimTelemetry telemetry = new SimTelemetry();
 
         // --- the opmode under test (byte-identical to the deploy version) ---
         // Default is the fixed spin turn; override with -Dsim.opmode=<fully.qualified.ClassName>
@@ -47,6 +48,8 @@ public class SimMain {
                 .getDeclaredConstructor().newInstance();
         opmode.hardwareMap = hw;
         opmode.telemetry = telemetry;
+        opmode.gamepad1 = new Gamepad();
+        opmode.gamepad2 = new Gamepad();
 
         System.out.println("=== FTC VibeSim ===");
         System.out.printf("Robot: ticks/rev=%.1f  wheel=%.1fcm  track=%.1fcm  ticks/cm=%.2f%n",
